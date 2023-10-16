@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Location and Directions</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}"></script>
+</head>
+<body>
+    <h1>Find My Location and Get Directions</h1>
+    <button id="get-location">Find My Location</button>
+    <div id="current-location"></div>
+    <h2>Enter a Destination</h2>
+    <form action="/directions" method="POST">
+        <input type="text" name="destination" placeholder="Enter destination">
+        <input type="hidden" id="origin" name="origin">
+        <input type="submit" value="Get Directions">
+    </form>
+    <div id="map" style="width: 100%; height: 500px;"></div>
+    <script>
+        var map;
+        var marker;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 0, lng: 0},
+                zoom: 2
+            });
+
+            // Get user's location
+            document.getElementById('get-location').addEventListener('click', function() {
+                fetch('/get_location')
+                    .then(response => response.json())
+                    .then(data => {
+                        var latitude = parseFloat(data.latitude);
+                        var longitude = parseFloat(data.longitude);
+
+                        // Set user's location on the map
+                        var location = {lat: latitude, lng: longitude};
+                        marker = new google.maps.Marker({position: location, map: map});
+                        map.setCenter(location);
+
+                        // Set the origin for the directions form
+                        document.getElementById('origin').value = latitude + "," + longitude;
+                    })
+                    .catch(error => console.error('Error fetching location:', error));
+            });
+        }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"></script>
+</body>
+</html>
